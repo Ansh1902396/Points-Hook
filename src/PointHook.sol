@@ -70,7 +70,16 @@ contract PointsHook is BaseHook, ERC20 {
         BalanceDelta delta,
         bytes calldata hookData
     ) external override onlyPoolManager returns (bytes4, int128) {
-        // We'll add more code here shortly
+        // Mint points equal to 20% of the amount of ETH they spent
+    // Since its a zeroForOne swap:
+    // if amountSpecified < 0:
+    //      this is an "exact input for output" swap
+    //      amount of ETH they spent is equal to |amountSpecified|
+    // if amountSpecified > 0:
+    //      this is an "exact output for input" swap
+    //      amount of ETH they spent is equal to BalanceDelta.amount0()
+
+        // uncomment this 
         // if (!key.currency0.isAddressZero()) return (this.afterSwap.selector, 0);
 
         // if (!swapParams.zeroForOne) return (this.afterSwap.selector, 0);
