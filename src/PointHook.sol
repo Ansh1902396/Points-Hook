@@ -71,17 +71,17 @@ contract PointsHook is BaseHook, ERC20 {
         bytes calldata hookData
     ) external override onlyPoolManager returns (bytes4, int128) {
         // We'll add more code here shortly
-        if (!key.currency0.isAddressZero()) return (this.afterSwap.selector, 0);
+        // if (!key.currency0.isAddressZero()) return (this.afterSwap.selector, 0);
 
-        if (!swapParams.zeroForOne) return (this.afterSwap.selector, 0);
+        // if (!swapParams.zeroForOne) return (this.afterSwap.selector, 0);
 
-        uint256 ethSpendAmount = uint256(int256(-delta.amount0()));
+        // uint256 ethSpendAmount = uint256(int256(-delta.amount0()));
 
-        uint256 pointsForSwap = ethSpendAmount / 5;
+        // uint256 pointsForSwap = ethSpendAmount / 5;
 
-        _assignPoints(hookData, pointsForSwap);
+        // _assignPoints(hookData, pointsForSwap);
 
-        return (this.afterSwap.selector, 0);
+        // return (this.afterSwap.selector, 0);
     }
 
     // Stub implementation for `afterAddLiquidity`
@@ -96,11 +96,11 @@ contract PointsHook is BaseHook, ERC20 {
        if (!key.currency0.isAddressZero()) return (this.afterSwap.selector, delta);
 
     // Mint points equivalent to how much ETH they're adding in liquidity
-    uint256 pointsForAddingLiquidity = uint256(int256(-delta.amount0()));
+    // uint256 pointsForAddingLiquidity = uint256(int256(-delta.amount0()));
 
-    // Mint the points
-    _assignPoints(hookData, pointsForAddingLiquidity);
+    // // Mint the points
+    // _assignPoints(hookData, pointsForAddingLiquidity);
 
-    return (this.afterAddLiquidity.selector, delta);
+    // return (this.afterAddLiquidity.selector, delta);
     }
 }
