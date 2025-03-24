@@ -73,6 +73,7 @@ contract TestPointsHook is Test, Deployers {
 
 function test_addLiquidityAndSwap() public {
     uint256 pointsBalanceOriginal = hook.balanceOf(address(this));
+    console.log(pointsBalanceOriginal);
 
     // Set user address in hook data
     bytes memory hookData = abi.encode(address(this));
@@ -104,6 +105,8 @@ function test_addLiquidityAndSwap() public {
     );
     uint256 pointsBalanceAfterAddLiquidity = hook.balanceOf(address(this));
 
+    console.log(pointsBalanceAfterAddLiquidity );
+
     assertApproxEqAbs(
         pointsBalanceAfterAddLiquidity - pointsBalanceOriginal,
         0.1 ether,
@@ -128,9 +131,12 @@ function test_addLiquidityAndSwap() public {
         hookData
     );
     uint256 pointsBalanceAfterSwap = hook.balanceOf(address(this));
+
+    console.log(pointsBalanceAfterSwap );
     assertEq(
-        pointsBalanceAfterSwap - pointsBalanceAfterAddLiquidity,
+        pointsBalanceAfterSwap - pointsBalanceAfterAddLiquidity ,
         2 * 10 ** 14
     );
+
 }
 }
