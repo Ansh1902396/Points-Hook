@@ -63,13 +63,13 @@ contract PointsHook is BaseHook, ERC20 {
     }
 
     // Stub implementation of `afterSwap`
-    function afterSwap(
+    function _afterSwap(
         address,
         PoolKey calldata key,
         IPoolManager.SwapParams calldata swapParams,
         BalanceDelta delta,
         bytes calldata hookData
-    ) external override onlyPoolManager returns (bytes4, int128) {
+    ) internal override onlyPoolManager returns (bytes4, int128) {
         // Mint points equal to 20% of the amount of ETH they spent
     // Since its a zeroForOne swap:
     // if amountSpecified < 0:
@@ -94,17 +94,17 @@ contract PointsHook is BaseHook, ERC20 {
     }
 
     // Stub implementation for `afterAddLiquidity`
-    function afterAddLiquidity(
+    function _afterAddLiquidity(
         address,
         PoolKey calldata key,
         IPoolManager.ModifyLiquidityParams calldata,
         BalanceDelta delta,
         BalanceDelta,
         bytes calldata hookData
-    ) external override onlyPoolManager returns (bytes4, BalanceDelta) {
-       if (!key.currency0.isAddressZero()) return (this.afterSwap.selector, delta);
+    ) internal override onlyPoolManager returns (bytes4, BalanceDelta) {
+    //    if (!key.currency0.isAddressZero()) return (this.afterSwap.selector, delta);
 
-    // Mint points equivalent to how much ETH they're adding in liquidity
+    // // Mint points equivalent to how much ETH they're adding in liquidity
     // uint256 pointsForAddingLiquidity = uint256(int256(-delta.amount0()));
 
     // // Mint the points

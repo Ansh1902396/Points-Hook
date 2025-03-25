@@ -47,6 +47,9 @@ contract TestPointsHook is Test, Deployers {
     uint160 flags = uint160(
         Hooks.AFTER_ADD_LIQUIDITY_FLAG | Hooks.AFTER_SWAP_FLAG
     );
+
+    console.log(flags);
+
     deployCodeTo(
         "PointHook.sol",
         abi.encode(manager, "Points Token", "TEST_POINTS"),
@@ -55,6 +58,8 @@ contract TestPointsHook is Test, Deployers {
 
     // Deploy our hook
     hook = PointsHook(address(flags));
+
+    console.log(address(flags));
 
     // Approve our TOKEN for spending on the swap router and modify liquidity router
     // These variables are coming from the `Deployers` contract
@@ -71,5 +76,73 @@ contract TestPointsHook is Test, Deployers {
     );
 }
 
+function test_addLiquidityAndSwap() public {
+    uint256 pointsBalanceOriginal = hook.balanceOf(address(this));
+    console.log(pointsBalanceOriginal);
 
+    // Set user address in hook data
+    bytes memory hookData = abi.encode(address(this));
+
+    uint160 sqrtPriceAtTickLower = TickMath.getSqrtPriceAtTick(-60);
+    uint160 sqrtPriceAtTickUpper = TickMath.getSqrtPriceAtTick(60);
+
+    uint256 ethToAdd = 2 ether;
+    uint128 liquidityDelta = LiquidityAmounts.getLiquidityForAmount0(
+        sqrtPriceAtTickLower,
+        SQRT_PRICE_1_1,
+        ethToAdd
+    );
+    uint256 tokenToAdd = LiquidityAmounts.getAmount1ForLiquidity(
+        sqrtPriceAtTickLower,
+        SQRT_PRICE_1_1,
+        liquidityDelta
+    );
+
+    modifyLiquidityRouter.modifyLiquidity{value: ethToAdd}(
+        key,
+        IPoolManager.ModifyLiquidityParams({
+            tickLower: -60,
+            tickUpper: 60,
+            liquidityDelta: int256(uint256(liquidityDelta)),
+            salt: bytes32(0)
+        }),
+        hookData
+    );
+    uint256 pointsBalanceAfterAddLiquidity = hook.balanceOf(address(this));
+    uint256 tokenBalance = token.balanceOf(address(this));
+
+    console.log(pointsBalanceAfterAddLiquidity);
+
+    assertApproxEqAbs(
+        pointsBalanceAfterAddLiquidity - pointsBalanceOriginal,
+        2 ether,
+        0.01 ether // error margin for precision loss
+    );
+
+    // Now we swap
+    // We will swap 0.001 ether for tokens
+    // We should get 20% of 0.001 * 10**18 points
+    // = 2 * 10**14
+    swapRouter.swap{value: 1 ether}(
+        key,
+        IPoolManager.SwapParams({
+            zeroForOne: true,
+            amountSpecified: -1 ether, // Exact input for output swap
+            sqrtPriceLimitX96: TickMath.MIN_SQRT_PRICE + 1
+        }),
+        PoolSwapTest.TestSettings({
+            takeClaims: false,
+            settleUsingBurn: false
+        }),
+        hookData
+    );
+    uint256 pointsBalanceAfterSwap = hook.balanceOf(address(this));
+
+    console.log(pointsBalanceAfterSwap );
+    assertEq(
+        pointsBalanceAfterSwap - pointsBalanceAfterAddLiquidity ,
+        2 * 10 ** 17
+    );
+
+}
 }
