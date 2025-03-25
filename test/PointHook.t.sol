@@ -47,6 +47,9 @@ contract TestPointsHook is Test, Deployers {
     uint160 flags = uint160(
         Hooks.AFTER_ADD_LIQUIDITY_FLAG | Hooks.AFTER_SWAP_FLAG
     );
+
+    console.log(flags);
+
     deployCodeTo(
         "PointHook.sol",
         abi.encode(manager, "Points Token", "TEST_POINTS"),
@@ -55,6 +58,8 @@ contract TestPointsHook is Test, Deployers {
 
     // Deploy our hook
     hook = PointsHook(address(flags));
+
+    console.log(address(flags));
 
     // Approve our TOKEN for spending on the swap router and modify liquidity router
     // These variables are coming from the `Deployers` contract
@@ -81,7 +86,7 @@ function test_addLiquidityAndSwap() public {
     uint160 sqrtPriceAtTickLower = TickMath.getSqrtPriceAtTick(-60);
     uint160 sqrtPriceAtTickUpper = TickMath.getSqrtPriceAtTick(60);
 
-    uint256 ethToAdd = 0.1 ether;
+    uint256 ethToAdd = 2 ether;
     uint128 liquidityDelta = LiquidityAmounts.getLiquidityForAmount0(
         sqrtPriceAtTickLower,
         SQRT_PRICE_1_1,
@@ -104,24 +109,25 @@ function test_addLiquidityAndSwap() public {
         hookData
     );
     uint256 pointsBalanceAfterAddLiquidity = hook.balanceOf(address(this));
+    uint256 tokenBalance = token.balanceOf(address(this));
 
-    console.log(pointsBalanceAfterAddLiquidity );
+    console.log(pointsBalanceAfterAddLiquidity);
 
     assertApproxEqAbs(
         pointsBalanceAfterAddLiquidity - pointsBalanceOriginal,
-        0.1 ether,
-        0.001 ether // error margin for precision loss
+        2 ether,
+        0.01 ether // error margin for precision loss
     );
 
     // Now we swap
     // We will swap 0.001 ether for tokens
     // We should get 20% of 0.001 * 10**18 points
     // = 2 * 10**14
-    swapRouter.swap{value: 0.001 ether}(
+    swapRouter.swap{value: 1 ether}(
         key,
         IPoolManager.SwapParams({
             zeroForOne: true,
-            amountSpecified: -0.001 ether, // Exact input for output swap
+            amountSpecified: -1 ether, // Exact input for output swap
             sqrtPriceLimitX96: TickMath.MIN_SQRT_PRICE + 1
         }),
         PoolSwapTest.TestSettings({
@@ -135,7 +141,7 @@ function test_addLiquidityAndSwap() public {
     console.log(pointsBalanceAfterSwap );
     assertEq(
         pointsBalanceAfterSwap - pointsBalanceAfterAddLiquidity ,
-        2 * 10 ** 14
+        2 * 10 ** 17
     );
 
 }

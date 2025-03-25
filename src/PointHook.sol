@@ -103,4 +103,7 @@ contract PointsHook is BaseHook, ERC20 {
 
     return (this.afterAddLiquidity.selector, delta);
     }
+
+
+    
 }
