@@ -102,7 +102,8 @@ contract PointsHook is BaseHook, ERC20 {
     _assignPoints(hookData, pointsForAddingLiquidity);
 
     return (this.afterAddLiquidity.selector, delta);
-    }
+
+}
 
 
     
